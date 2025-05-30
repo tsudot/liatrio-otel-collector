@@ -13,6 +13,7 @@ query getAllGroupProjects(
       }
 
       nodes {
+        id
         name
         fullPath
         createdAt
@@ -25,6 +26,7 @@ query getAllGroupProjects(
 query getProjectsByTopic($org: String!, $topics: [String!]) {
   projects(searchNamespaces: true, search: $org, topics: $topics) {
     nodes {
+      id
       name
       fullPath
       createdAt
@@ -71,6 +73,20 @@ query getMergeRequests(
           additions
           deletions
         }
+      }
+    }
+  }
+}
+
+query getPipelines($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    pipelines(first: 20) {
+      nodes {
+        id
+        iid
+        status
+        ref
+        createdAt
       }
     }
   }
