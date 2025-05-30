@@ -19,6 +19,7 @@ type gitlabProject struct {
 	CreatedAt      time.Time
 	LastActivityAt time.Time
 	URL            string
+	ID             string
 }
 
 func (gls *gitlabScraper) getProjects(ctx context.Context, restClient *gitlab.Client) ([]gitlabProject, error) {
@@ -58,6 +59,7 @@ func (gls *gitlabScraper) getProjects(ctx context.Context, restClient *gitlab.Cl
 					CreatedAt:      *p.CreatedAt,
 					LastActivityAt: *p.LastActivityAt,
 					URL:            p.WebURL,
+					ID:             strconv.Itoa(p.ID),
 				})
 			}
 

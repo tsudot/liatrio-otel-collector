@@ -112,6 +112,7 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		path := project.Path
 		now := now
 		url := project.URL
+		projectID := project.ID
 
 		go func() {
 			defer wg.Done()
@@ -123,11 +124,13 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 			}
 
 			// Check if pipelines are present in the project
-			var is_code_project bool
+			code_project := 0
 			if pipelines != nil && len(pipelines.Nodes) > 0 {
 				// Record attribute is_code_project as true
-				is_code_project = true
+				code_project = 1
 			}
+
+			gls.mb.RecordVcsCodeRepositoryCountDataPoint(now, int64(code_project), url, path, projectID)
 
 			branches, err := gls.getBranchNames(ctx, graphClient, path)
 			if err != nil {
@@ -138,7 +141,7 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 			// from having a nil pointer error passing in the SetStartTimestamp
 			mux.Lock()
 			refType := metadata.AttributeVcsRefHeadTypeBranch
-			gls.mb.RecordVcsRefCountDataPoint(now, int64(len(branches.BranchNames)), url, path, refType, is_code_project)
+			gls.mb.RecordVcsRefCountDataPoint(now, int64(len(branches.BranchNames)), url, path, refType, projectID)
 			mux.Unlock()
 
 			for _, branch := range branches.BranchNames {
@@ -154,7 +157,7 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 				if commit != nil {
 					branchAge := time.Since(*commit.CreatedAt).Seconds()
 					mux.Lock()
-					gls.mb.RecordVcsRefTimeDataPoint(now, int64(branchAge), url, path, branch, refType)
+					gls.mb.RecordVcsRefTimeDataPoint(now, int64(branchAge), url, path, branch, refType, projectID)
 					mux.Unlock()
 				}
 			}
@@ -173,7 +176,7 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 				return
 			}
 			mux.Lock()
-			gls.mb.RecordVcsContributorCountDataPoint(now, int64(contributorCount), url, path)
+			gls.mb.RecordVcsContributorCountDataPoint(now, int64(contributorCount), url, path, projectID)
 			// gls.mb.RecordVcsRepositoryContributorCountDataPoint(now, int64(contributorCount), path)
 
 			for _, mr := range mrs {
@@ -187,10 +190,10 @@ func (gls *gitlabScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 				// get returned as in Go.
 				if mr.MergedAt.IsZero() {
 					mrAge := int64(time.Since(mr.CreatedAt).Seconds())
-					gls.mb.RecordVcsChangeDurationDataPoint(now, mrAge, url, path, mr.SourceBranch, metadata.AttributeVcsChangeStateOpen)
+					gls.mb.RecordVcsChangeDurationDataPoint(now, mrAge, url, path, mr.SourceBranch, metadata.AttributeVcsChangeStateOpen, projectID)
 				} else {
 					mergedAge := int64(mr.MergedAt.Sub(mr.CreatedAt).Seconds())
-					gls.mb.RecordVcsChangeTimeToMergeDataPoint(now, mergedAge, url, path, mr.SourceBranch)
+					gls.mb.RecordVcsChangeTimeToMergeDataPoint(now, mergedAge, url, path, mr.SourceBranch, projectID)
 				}
 			}
 			mux.Unlock()

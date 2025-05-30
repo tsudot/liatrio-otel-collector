@@ -231,6 +231,8 @@ func (v *getAllGroupProjectsGroupProjectsProjectConnection) GetNodes() []getAllG
 
 // getAllGroupProjectsGroupProjectsProjectConnectionNodesProject includes the requested fields of the GraphQL type Project.
 type getAllGroupProjectsGroupProjectsProjectConnectionNodesProject struct {
+	// ID of the project.
+	Id string `json:"id"`
 	// Name of the project (without namespace).
 	Name string `json:"name"`
 	// Full path of the project.
@@ -240,6 +242,9 @@ type getAllGroupProjectsGroupProjectsProjectConnectionNodesProject struct {
 	// Timestamp of the project last activity.
 	LastActivityAt time.Time `json:"lastActivityAt"`
 }
+
+// GetId returns getAllGroupProjectsGroupProjectsProjectConnectionNodesProject.Id, and is useful for accessing the field via an interface.
+func (v *getAllGroupProjectsGroupProjectsProjectConnectionNodesProject) GetId() string { return v.Id }
 
 // GetName returns getAllGroupProjectsGroupProjectsProjectConnectionNodesProject.Name, and is useful for accessing the field via an interface.
 func (v *getAllGroupProjectsGroupProjectsProjectConnectionNodesProject) GetName() string {
@@ -468,6 +473,8 @@ func (v *getProjectsByTopicProjectsProjectConnection) GetNodes() []getProjectsBy
 
 // getProjectsByTopicProjectsProjectConnectionNodesProject includes the requested fields of the GraphQL type Project.
 type getProjectsByTopicProjectsProjectConnectionNodesProject struct {
+	// ID of the project.
+	Id string `json:"id"`
 	// Name of the project (without namespace).
 	Name string `json:"name"`
 	// Full path of the project.
@@ -477,6 +484,9 @@ type getProjectsByTopicProjectsProjectConnectionNodesProject struct {
 	// Timestamp of the project last activity.
 	LastActivityAt time.Time `json:"lastActivityAt"`
 }
+
+// GetId returns getProjectsByTopicProjectsProjectConnectionNodesProject.Id, and is useful for accessing the field via an interface.
+func (v *getProjectsByTopicProjectsProjectConnectionNodesProject) GetId() string { return v.Id }
 
 // GetName returns getProjectsByTopicProjectsProjectConnectionNodesProject.Name, and is useful for accessing the field via an interface.
 func (v *getProjectsByTopicProjectsProjectConnectionNodesProject) GetName() string { return v.Name }
@@ -518,6 +528,7 @@ query getAllGroupProjects ($fullPath: ID!, $after: String) {
 				endCursor
 			}
 			nodes {
+				id
 				name
 				fullPath
 				createdAt
@@ -696,6 +707,7 @@ const getProjectsByTopic_Operation = `
 query getProjectsByTopic ($org: String!, $topics: [String!]) {
 	projects(searchNamespaces: true, search: $org, topics: $topics) {
 		nodes {
+			id
 			name
 			fullPath
 			createdAt
